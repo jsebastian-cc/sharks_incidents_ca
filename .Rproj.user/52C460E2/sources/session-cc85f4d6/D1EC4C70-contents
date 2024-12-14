@@ -1,0 +1,210 @@
+---
+title: "Shark Incidents in California"
+author: Diego Paredes, Diego Farah, Luis Bracho
+date: September 21, 2024 
+format:
+  html:
+    toc: true 
+    toc-location: right
+    theme: flatly
+    self-contained: true
+    code_folding: hide
+---
+<center>
+<img src="images/sharkimage.jpeg" width=800>
+</center>
+
+# Introduction
+
+bla bla bla
+
+# Data Sources
+Metadata Updated: March 30, 2024
+
+The dataset includes information on the date, time, location, water depth, human activity, injury (if any), species of shark, and source information.
+
+For latest information, please visit https://wildlife.ca.gov/Conservation/Marine/White-Shark.
+
+This data and metadata were submitted by California Department of Fish and Wildlife (CDFW) Staff though the Data Management Plan (DMP) framework with the id: DMP000500. For more information, please visit https://wildlife.ca.gov/Data/Sci-Data.
+
+```{r}
+#| label: setup 
+#| include: false
+
+# Load libraries and settings here
+library(tidyverse)
+library(readxl)
+library(here)
+
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE,
+  comment = "#>",
+  fig.path = "figs/", # Folder where rendered plots are saved
+  fig.width = 7.252, # Default plot width
+  fig.height = 4, # Default plot height
+  fig.retina = 3 # For better plot resolution
+)
+
+# Put any other "global" settings here, e.g. a ggplot theme:
+theme_set(theme_bw(base_size = 20))
+
+# Write code below here to load any data used in project
+data = read_excel("Copy of SharkIncidents_1950_2022_220302.xlsx")
+```
+
+
+# Questions 
+
+THERE ARE A LOT OF INTERESTING QUESTIONS WE WANT TO APROACH
+
+Is there a lethal shark, or a species that tries to attack more than others?
+
+Is there an activity that increases the probability of attack?
+
+Is there a town or city where attacks are more common?
+At what depth do most attacks occur?
+If a shark attacks you... will it kill you for sure?
+
+## Data Cleaning 
+
+Hay datos que no estan claros, yo lo explico despues... 
+Para esto hay que limpiarlos
+
+```{r}
+head(data)
+```
+
+El comando "tail" nos deja ver los ultimas 6 filas 
+
+```{r}
+tail(data)
+```
+
+```{r}
+columns = names(data)
+```
+
+```{r}
+data=data[1:(nrow(data) - 9), ]
+```
+
+There is necessary to adapt the data types in order to analyze better the information.
+
+```{r}
+data$IncidentNum = as.numeric(data$IncidentNum)
+data$Time = as.numeric(data$Time)
+data$Mode = as.factor(data$Mode)
+data$Species = as.factor(data$Species)
+data$County = as.factor(data$County)
+data$Location = as.factor(data$Location)
+data$Depth = ifelse(data$Depth == "surface"  | data$Depth == "surface*", 0, data$Depth)
+data$Depth = ifelse(data$Depth == "underwater"  | data$Depth == "submerged" | data$Depth == "submerged*", 5, data$Depth)
+data$Injury = ifelse(data$Injury == "minor*", 'minor', data$Injury)
+data$Injury = ifelse(data$Injury == "major*", 'major',data$Injury)
+data$Injury = ifelse(data$Injury == "none*", 'none',data$Injury)
+data$Injury = as.factor(data$Injury)
+data$Depth = as.numeric(data$Depth)
+data$Species = as.factor(data$Species)
+data <- data[!is.na(data$IncidentNum), ]
+data$number <- seq_len(nrow(data))
+```
+
+```{r}
+summary(data)
+```
+
+
+# Answers
+
+### There is a letal shark, o una especie que intente atacar mas que otros?
+
+```{r}
+injury_specie_count <- data %>% 
+  count(Species, Injury) %>% 
+  rename(
+    injury_count = 'n'
+  )
+injury_specie_count
+```
+
+```{r}
+injury_by_specie_plot <- ggplot(injury_specie_count, aes(Injury, injury_count))+
+  geom_col(width = 0.8, position = 'fill', aes(fill = Species)) +
+  theme(plot.title = element_text(hjust = 0.5, size = 15)) +
+  scale_y_continuous(
+    expand = expansion(mult = c(0, 0.05)), 
+    labels = scales:: percent_format()
+  )+
+  labs(x = "Type of Injury",
+       y = "Percentage",
+       title = "Injurys by Species", 
+       fill = 'Specie') 
+
+injury_by_specie_plot
+```
+
+
+### What relationship is between the activity and the Injury type?
+
+```{r}
+conTable = table(data$Mode, data$Injury)
+conTable
+```
+
+<center>
+<img src="images/surfing.jpeg" width=350>
+</center>
+
+We can see that swimming and surfing is the most letal activity
+```{r}
+injury_mode_count <- data %>% 
+  count(Mode, Injury) %>% 
+  rename(
+    injury_count = 'n'
+  )
+injury_mode_count
+
+injury_by_mode_plot <- ggplot(injury_mode_count, aes(Injury, injury_count))+
+  geom_col(width = 0.8, position = 'fill', aes(fill = Mode)) +
+  theme(plot.title = element_text(hjust = 0.5, size = 15)) +
+  scale_y_continuous(
+    expand = expansion(mult = c(0, 0.05)), 
+    labels = scales:: percent_format()
+  )+
+  labs(x = "Injury",
+       y = "Percentages",
+       title = "Injurys by Activities", 
+       fill = 'Activity') 
+
+injury_by_mode_plot
+```
+
+
+### Existe un pueblo o ciudad donde los ataques sean mas comunes?**
+
+<center>
+<img src="images/californiamap.jpeg" width=550>
+</center>
+
+```{r}
+Table = table(data$County, data$Injury)
+Table
+```
+<center>
+<img src="images/islands.jpeg" width=350>
+</center>
+
+### There is a depth, mostly incidents occur?
+
+```{r}
+Table_depth = table(data$Depth, data$Injury)
+Table_depth
+```
+
+
+
+<center>
+<img src="images/logo.png" width=150>
+</center>
+

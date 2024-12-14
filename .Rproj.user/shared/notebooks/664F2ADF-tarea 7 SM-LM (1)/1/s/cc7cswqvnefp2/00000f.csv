@@ -1,0 +1,7 @@
+"0","datalapop = datalapop[complete.cases(datalapop[c(""e5"", ""q1tc_r"",""q10inc"", ""l1n"", ""edre"")]),]"
+"0","dim(datalapop)"
+"1","[1]"
+"1"," 1178"
+"1","  207"
+"1","
+"

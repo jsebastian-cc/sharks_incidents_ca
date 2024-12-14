@@ -1,0 +1,10 @@
+"0","plot_summs(relin,coefs = c(""Género"" = ""q1tc_r"" ,""Ingreso""= ""q10inc"","
+"0","                           ""Ideología""=""l1n"",""Nivel Educativo""=""edre""),"
+"0","           scale = TRUE, robust = TRUE)"
+"2","Registered S3 methods overwritten by 'broom':
+  method            from  
+  tidy.glht         jtools
+  tidy.summary.glht jtools
+"
+"2","Loading required namespace: broom.mixed
+"

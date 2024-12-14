@@ -1,0 +1,1 @@
+"0","relin <- lm (e5 ~ q1tc_r + q10inc + l1n + edre, data = datalapop)"

@@ -1,0 +1,1 @@
+"0","datalapop$q1tc_r = ifelse(datalapop$q1tc_r == 1, ""Hombre"", ""Mujer"")"
