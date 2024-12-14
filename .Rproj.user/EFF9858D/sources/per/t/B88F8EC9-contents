@@ -1,0 +1,358 @@
+---
+title: "Project Proposal"
+subtitle: "Shark Incidents in California"
+author: Luis Bracho, Diego Farah, Diego Paredes
+date: September 22, 2024
+format: 
+  html:
+    toc: true 
+    toc-location: right
+    theme: flatly
+    self-contained: true
+---
+<center>
+<img src="images/sharkimage.jpeg" width=800>
+</center>
+
+# Topic and Research Question
+The topic of this project is the exploration of shark incidents in California based on a dataset provided by the California Department of Fish and Wildlife. The research questions will focus on identifying patterns in the data rather than establishing causality. For example, some of the research questions include: 
+
+1. *What types of injuries are most common in shark incidents?* 
+
+2. *Is there a specific activity that is more prone to shark incidents?*
+
+3. *Which species of sharks are most commonly involved in incidents?.*
+
+4. *If a shark attacks you… will it kill you for sure?*
+
+# Introduction
+
+Shark incidents have long fascinated researchers and the public alike, given the potentially fatal nature of these encounters and their connection to popular beach activities. 
+This project aims to explore the characteristics of shark incidents in California, specifically focusing on the types of injuries sustained (fatal, major, minor or none). We want to know using data, the probability that if a shark attack someone, that person would be dead.
+
+Also We want to explore, the common activities during attacks (scuba diving, Swimming, surfing and other more). and whether particular shark species are more likely to be involved. 
+And last interesting question We want to approach in this study, is what particular shark species are more likely to be involved. 
+The study will provide valuable exploratory insights into the patterns of these incidents, which could help inform safety measures for coastal activities. By analyzing historical data on shark incidents, this research will help understand the frequency of attacks and potentially identify the environmental and behavioral factors that correlate with different injury types.
+
+
+</center>
+<img src="images/jawls_movie.jpeg" width=200>
+<img src="images/sharkbite.jpeg" width=350>
+<img src="images/surfing.jpeg" width=350>
+<img src="images/species.jpeg" width=350>
+</center>
+
+# Data Sources
+
+The primary data source for this project is the California Department of Fish and Wildlife’s dataset on shark incidents, last updated in March 2024. This dataset includes a wide range of variables, such as the date, time, location, water depth, type of human activity, species of shark involved, and the severity of injuries. The data is original and directly collected from incidents reported in California, ensuring its reliability. However, there may be some concerns related to incomplete data entries or inconsistencies in how certain variables were recorded. These issues will be addressed through data cleaning and preparation. For example, the depth and injury fields will need to be standardized, and any missing or ambiguous entries will be carefully handled to maintain the integrity of the analysis.
+
+Link 1: [https://wildlife.ca.gov/Conservation/Marine/White-Shark.](https://wildlife.ca.gov/Conservation/Marine/White-Shark)
+
+Link 2: [https://wildlife.ca.gov/Data/Sci-Data.](https://wildlife.ca.gov/Data/Sci-Data)
+
+Link 3: [https://catalog.data.gov/dataset/shark-incident-database-california-56167](https://catalog.data.gov/dataset/shark-incident-database-california-56167) 
+
+```{r}
+#| label: setup 
+#| include: false
+
+# Load libraries and settings here
+library(tidyverse)
+library(readxl)
+library(here)
+library(viridis)
+library(dplyr)
+library(gridExtra)
+library(purrr)
+library(waffle)
+
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE,
+  comment = "#>",
+  fig.path = "figs/", # Folder where rendered plots are saved
+  fig.width = 7.252, # Default plot width
+  fig.height = 4, # Default plot height
+  fig.retina = 3 # For better plot resolution
+)
+
+# Put any other "global" settings here, e.g. a ggplot theme:
+theme_set(theme_bw(base_size = 20))
+
+# Write code below here to load any data used in project
+path <- here::here("data_raw", "Copy of SharkIncidents_1950_2022_220302.xlsx")
+data = read_excel(path)
+```
+
+# Anticipated Results
+
+In this analysis, we expect to examine two key variables: the mode of activity during the shark incident and the type of injury sustained. Based on the dataset, it is anticipated that activities like surfing and swimming will show a higher frequency of incidents. Additionally, injuries will likely range from minor to fatal, with surfing-related activities potentially resulting in more severe outcomes. We anticipate that these variables will be distributed in a way that shows many patterns, where certain activities dominate the data. For example, it’s expected that shark incidents are concentrated in shallow waters where swimming and surfing take place. We also expect to find relationships between shark species and injury severity, where species like the Great White Shark may be more commonly associated with fatal incidents. 
+
+The first chart illustrates the geographical distribution of shark incidents along the California coast, with a focus on the "Red Triangle" where incidents take place. This helps visualize the relationship between locations and incident frequency. 
+The second chart shows shark incidents by activity type across different years, which helps to visualize the expected distribution of incidents across different activities and how this may change over time. 
+
+The distribution of activity types and injury severities will inform our understanding of which activities are most prone to shark incidents and how dangerous these incidents can be. The relationships between activity type and injury type will help answer research questions about what factors contribute to the likelihood and severity of shark-related injuries.
+
+<center>
+<img src="images/incidentsCA.jpg" width=400>
+<img src="images/variety.jpg" width=600>
+</center>
+
+
+# Data Cleaning
+
+First, lets load the data in R, and see the first 6 observations.
+
+```{r}
+head(data)
+```
+
+
+Last 9 rows do not provide any information. So this is necessary to clean data.
+
+```{r}
+data=data[1:(nrow(data) - 9), ]
+```
+
+For further processing we transform the variables into the desired type. For example, the variables *Species* ,*County*, *Mode* are taken by *R* as character, but for us it would be better to consider them as factor.
+
+```{r}
+data$IncidentNum = as.numeric(data$IncidentNum)
+data$Time = as.numeric(data$Time)
+data$Mode = as.factor(data$Mode)
+data$Species = as.factor(data$Species)
+data$County = as.factor(data$County)
+data$Location = as.factor(data$Location)
+```
+
+There are observations that are not entirely well given and to better analyze what we want to answer it is necessary to solve these inconsistencies.     
+
+```{r}
+data$Depth = ifelse(data$Depth == "surface"  | data$Depth == "surface*", 0, data$Depth)
+data$Depth = ifelse(data$Depth == "underwater"  | data$Depth == "submerged" | data$Depth == "submerged*", 5, data$Depth)
+data$Injury = ifelse(data$Injury == "minor*", 'minor', data$Injury)
+data$Injury = ifelse(data$Injury == "major*", 'major',data$Injury)
+data$Injury = ifelse(data$Injury == "none*", 'none',data$Injury)
+data$Injury = as.factor(data$Injury)
+data$Depth = as.numeric(data$Depth)
+data$Species = as.factor(data$Species)
+data <- data[!is.na(data$IncidentNum), ]
+data$number <- seq_len(nrow(data))
+```
+
+Let's summarize our dataset:
+
+```{r}
+summary(data)
+```
+
+# Evaluating our proposal expectations
+
+**Is there a lethal shark, or a species that tries to attack more than others?**
+
+First We create a pie chart to see the most common species involved in attacks.
+
+```{r}
+species_counts <- data %>%
+  count(Species) %>%
+  mutate(percentage = n / sum(n) * 100,
+         label = paste0(Species, " (", round(percentage, 1), "%)"))
+
+ggplot(species_counts, aes(x = "", y = percentage, fill = Species)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y") +
+  labs(title = "Distribution of Shark Species", x = NULL, y = NULL) +
+  theme_void() +
+  scale_fill_brewer(palette = "Set3")
+```
+
+We see that white shark is the most common by huge difference.
+```{r}
+species_counts
+```
+
+To answer this interesting question we created a bar plot for each type of injury, in which we will see which species are involved in each type of injury.
+
+
+```{r}
+injury_mode_count <- data %>%
+  count(Mode, Injury) %>%
+  rename(injury_count = 'n')
+
+# Order activities by the total number of incidents
+total_incidents_per_mode <- injury_mode_count %>%
+  group_by(Mode) %>%
+  summarise(total_incidents = sum(injury_count)) %>%
+  arrange(desc(total_incidents))
+
+injury_mode_count$Mode <- factor(injury_mode_count$Mode, 
+                                 levels = total_incidents_per_mode$Mode)
+
+# Create the faceted bar chart with adjusted label positions
+ggplot(injury_mode_count, aes(x = Mode, y = injury_count, fill = Mode)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = injury_count), hjust = -0.5, size = 3) + 
+  coord_flip() +
+  labs(
+    title = "Injury Types by Activity",
+    x = "Activity",
+    y = "Number of Incidents"
+  ) +
+  scale_fill_viridis_d(option = "plasma", guide = "none") + 
+  facet_wrap(~ Injury, scales = "free_y") + 
+  expand_limits(y = max(injury_mode_count$injury_count) * 1.1) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    strip.text = element_text(size = 12, face = "bold")
+  )
+
+```
+
+The information provided by these bar plots is revealing, white sharks are the only species that are present in fatal accidents and in those with quite high damage, giving us the understanding that it is the only species that humans can become afraid of.
+
+**What relationship is between the activity and the Injury type?**
+
+```{r}
+conTable = table(data$Mode, data$Injury)
+conTable
+```
+
+
+```{r}
+injury_mode_count <- data %>% 
+  count(Mode, Injury) %>% 
+  rename(
+    injury_count = 'n'
+  )
+injury_mode_count
+```
+
+We see that the most dangerous activities are on the surface, swimming, surfing, freediving. Diving has very few accidents.
+
+**Is there a town or city where attacks are more common?**
+```{r}
+Table = table(data$County, data$Injury)
+Table
+```
+
+```{r}
+county_counts <- data %>%
+  count(County) %>%
+  arrange(desc(n))
+
+p <- ggplot(county_counts, aes(x = reorder(County, n), y = n, fill = County)) +
+  geom_bar(stat = "identity", fill = "gray40") +
+  geom_text(aes(label = n), hjust = -0.1, size = 3.5, color = "black") +
+  coord_flip() +
+  labs(
+    title = "Shark Incidents per County",
+    x = "County",
+    y = "Number of Incidents"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    legend.position = "none"
+  )
+p 
+```
+
+Here we can see that the city where the largest number of accidents occurred was san diego with a little over 25 attacks recorded. San Francisco, for example, does not have many attacks (less than 5) and Los Angeles, which is a large city, has less than 10.
+
+**There is a depth, mostly incidents occur?**
+```{r}
+Table_depth = table(data$Depth, data$Injury)
+Table_depth
+```
+
+We see that the highest number of accidents, both fatal and non-fatal, were recorded for activities carried out on the surface, giving us the understanding, for example, that diving is a safe activity if we refer to the danger of being attacked by a shark.
+
+
+**Is there a specific activity that is more prone to shark incidents?**
+
+```{r}
+ggplot(injury_mode_count, aes(x = reorder(Mode, injury_count), y = injury_count, fill = Injury)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = injury_count), hjust = -0.5, size = 3) + 
+  coord_flip() +
+  labs(title = "Injury Types by Activity", x = "Activity", y = "Number of Incidents") +
+  theme_minimal() +
+  facet_wrap(~ Injury, scales = "free_y") +
+  expand_limits(y = max(injury_mode_count$injury_count) * 1.1) +
+  theme(strip.background = element_blank(), 
+        strip.placement = "outside")
+
+```
+
+
+```
+
+**If a shark attacks you… will it kill you for sure?**
+
+No neccesary, in fact there are cases where I was not gamage at all.
+
+
+```{r}
+# Install the waffle package if not already installed
+# install.packages("waffle")
+
+library(waffle)
+library(ggplot2)
+injury_counts <- data %>%
+  count(Injury) %>%
+  mutate(percentage = n / sum(n) * 100,
+         label = paste0(round(percentage, 1), "%")) 
+# Create a named vector for the waffle chart
+injury_counts_vector <- setNames(injury_counts$n, injury_counts$Injury)
+
+# Create the waffle chart
+waffle_chart <- waffle(injury_counts_vector, rows = 10, 
+                       colors = RColorBrewer::brewer.pal(n = length(injury_counts$Injury), "Set3"),
+                       title = "Distribution of Injury Types")
+
+# Plot the chart
+print(waffle_chart)
+
+```
+
+In fact the the 39 % of attacks did not damage.
+
+-----
+
+```{r}
+# Extract month from the Date column and create a month factor
+data$Month <- format(as.Date(data$Date, format = "%Y-%m-%d"), "%B")
+data$Month <- factor(data$Month, levels = month.name, ordered = TRUE)
+
+# Count the number of incidents per month
+month_counts <- data %>%
+  count(Month) %>%
+  arrange(Month)
+
+# Plot the number of shark incidents by month
+ggplot(month_counts, aes(x = Month, y = n, group = 1)) +
+  geom_line(color = "darkred", size = 1) +
+  geom_point(color = "darkred", size = 2) +
+  labs(
+    title = "Shark Incidents by Month",
+    x = "Month",
+    y = "Number of Incidents"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title.x = element_text(size = 14),
+    axis.title.y = element_text(size = 14)
+  )
+```
+

@@ -1,0 +1,95 @@
+---
+title: "Latinos in Miami"
+subtitle: "Final Report"
+author: Sabina Pereira, Marena Marzari, Federica Negron
+date: September 22, 2023 
+format: 
+  html:
+    toc: true 
+    toc-location: right
+    theme: litera
+    self-contained: true
+---
+
+```{r}
+#| label: setup 
+#| include: false
+
+# Load libraries and settings here
+library(tidyverse)
+library(here)
+
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE,
+  comment = "#>",
+  fig.path = "figs/", # Folder where rendered plots are saved
+  fig.width = 7.252, # Default plot width
+  fig.height = 4, # Default plot height
+  fig.retina = 3 # For better plot resolution
+)
+
+# Put any other "global" settings here, e.g. a ggplot theme:
+theme_set(theme_bw(base_size = 20))
+
+# Write code below here to load any data used in project
+
+```
+
+## Research question
+
+How many Latinos in Florida were born in the US versus how many migrated from Latin countries?
+
+## Data sources
+
+[link 1](https://www.migrationpolicy.org/article/frequently-requested-statistics-immigrants-and-immigration-united-states)
+[link 1.1](https://travel.state.gov/content/dam/visas/Statistics/Immigrant-Statistics/WaitingList/WaitingListItem_2022.pdf)
+[link 1.2](https://www.uscis.gov/sites/default/files/document/data/EB_I140_I360_I526_performancedata_fy2022_Q1_Q2.pdf)
+
+The information in the document comes from the Migration Policy Institute (MPI), a reputable research organization. MPI compiles and analyzes data from sources like the U.S. Census Bureau and USCIS. While MPI processes the data, it primarily relies on original data from these sources. However, data accuracy and timeliness may be affected by potential delays and policy changes. It's advisable to cross-reference with other sources and consider data collection methods for a complete assessment of validity.
+
+
+[link 2](https://www.migrationpolicy.org/data/unauthorized-immigrant-population/county/12086)
+
+The data source for the unauthorized population profile in Miami Dade-Monroe Counties, FL, is an analysis by the Migration Policy Institute (MPI) based on U.S. Census Bureau data from the 2015-19 American Community Survey (ACS) and the 2008 Survey of Income and Program Participation (SIPP), adjusted to 2019 estimates. The original data was collected by the U.S. Census Bureau, with population estimates provided by Jennifer Van Hook of The Pennsylvania State University. Concerns include potential inaccuracies due to survey limitations and the methodology's reliance on estimation and categorization, which may introduce uncertainty into the findings.
+
+
+[link 3](https://www.ncbi.nlm.nih.gov/books/NBK19901/)
+[link 3.1](https://www.ncbi.nlm.nih.gov/books/NBK19901/table/a2000e49dttt00019/?report=objectonly)
+
+The National Library of Medicine contains extensive demographic and migration data, does not explicitly identify the specific data sources or whether the data presented are original or pre-processed. Therefore, it is challenging to evaluate the validity of the source comprehensively. In academic research, data sources should ideally be transparent about their origins, collection methods, and any pre-processing. 
+
+
+[link 4](https://www.americanimmigrationcouncil.org/research/immigrants-florida)
+[link 4.1](https://data.americanimmigrationcouncil.org/map-the-impact/)
+
+The data from the American Immigration Council appears credible, sourced from reputable government agencies like the U.S. Census Bureau. It is likely original data, but specific collection methods aren't detailed. Transparency through citations enhances credibility. However, verifying the most recent figures is recommended due to potential data changes over time.
+
+
+## Anticipated results
+
+##### Choose two variables that you expect to find in your data that are relevant to your research question.
+
+Latinos in florida that were born in the USA vs latinos in florida who migrated to the USA.
+
+##### Regardless of whether those variables actually exist, describe how you would expect each to be distributed (e.g. unimodal, multimodel, tightly-group, widely-spread, etc.). For example, you might expect the price of gasoline over a particular period to be rather tightly-grouped around a mean, whereas the stock price of a particular company might vary much more widely over the same period.
+
+We expect that the ratio of Latinos that live in Florida who are immigrants is greater than the ratio of Latinos that live in Florida that were born in the USA. 
+
+##### Describe two relationships you expect to find among variables in your data (again, regardless of whether they actually exist in your data). For example, you might expect sales of hybrid vehicles to increase when gas prices increase; in this case, I am expecting that hybrid vehicle sales and gasoline prices are positively correlated.
+
+Relationship #1: we expect that the ratio of immigrant Latinos to the USA increases when their country is in humanity crisis, such as Cuba, Venezuela, others. Therefore, they’re positively correlated. 
+Relationship #2: we expect that bordering countries have a greater percentage of immigrant latinos than any other countries, such as Mexicans in Texas, therefore, proximity and the Latino immigration rate is positively correlated. 
+
+##### Describe at least two charts that you expect will help you visualize the relationships that you expect to find. For example, a scatterplot of gasoline prices and hybrid vehicle sales over a particular time period might be useful for visualizing the level of correlation between these two variables.
+
+graph #1: a scatter plot graph of Latinos who migrated to Florida vs the Latinos that were born in the usa but are considered Latin Americans due to their backgrounds (all living in Florida). 
+graph #2: a graph that demonstrates the relationship between countries in humanity crisis and their immigration rate to Florida.
+
+##### Discuss how your expectations about the variables you chose will help inform you about your research question.
+
+We expect that these variables will help us categorize Latinos in Florida that were born in the USA vs those that are considered Latin Americans but were born in the USA. Also, by having information in countries with humanity crisis we would know what to expect from the percentages of immigrants from specific countries; therefore, categorizing each immigrant with a specific country and a percentage.
+
+## Attribution
+
+All members contributed equally.

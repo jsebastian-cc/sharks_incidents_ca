@@ -1,0 +1,6 @@
+"0","month <- c(""January"", ""February"", ""March"", ""April"", ""May"", ""June"", ""July"", ""August"", ""September"", ""October"", ""November"", ""December"")"
+"0","month_percentage <- c(0.26,.28,.33,.31,.41,.50,.52,.54,.50,.36,.29,.27)"
+"0",""
+"0","data_month_per_bath <- data.frame(Month = month, month_percentage = month_percentage)"
+"0","data_month_per_bath$month_asis_percentage <- data_month_per_bath$month_percentage*data_month_per_assistance$month_percentage"
+"0","data_month_per_bath "

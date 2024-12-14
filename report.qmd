@@ -1,0 +1,554 @@
+---
+title: "Project Proposal"
+subtitle: "Shark Incidents in California"
+author: Luis Bracho, Diego Farah, Diego Paredes
+date: November 25, 2024
+format: 
+  html:
+    toc: true 
+    toc-location: right
+    theme: flatly
+    self-contained: true
+    code-fold: true
+---
+<center>
+<img src="images/sharkimage.jpeg" width=800>
+</center>
+
+# Topic and Research Question
+The topic of this project is the exploration of shark incidents in California based on a dataset provided by the California Department of Fish and Wildlife. The research questions will focus on identifying patterns in the data rather than establishing causality. For example, some of the research questions include: 
+
+1. *Which species of sharks are most commonly involved in incidents?.*
+
+2. *Is there a specific activity that is more prone to shark incidents?*
+
+3. *What types of injuries are most common in shark incidents, if a shark attacks you… will it kill you for sure?*
+
+4. *Is there a town or city where attacks are more common?*
+
+5. *There is a depth, mostly incidents occur?*
+
+6. *Is there a month or time when more accidents occur?*
+
+7. *What percentage of people attend to beach per day and what percentage of beach visitors bathe??*
+
+8. *What is the incidents per-capita?*
+
+9. *Are sharks really a danger to humans?*
+
+# Introduction
+
+Shark incidents have long fascinated researchers and the public alike, given the potentially fatal nature of these encounters and their connection to popular beach activities. 
+This project aims to explore the characteristics of shark incidents in California, specifically focusing on the types of injuries sustained (fatal, major, minor or none). We want to know using data, the probability that if a shark attack someone, that person would be dead.
+
+Also We want to explore, the common activities during attacks (scuba diving, Swimming, surfing and other more). and whether particular shark species are more likely to be involved. 
+And last interesting question We want to approach in this study, is what particular shark species are more likely to be involved. 
+The study will provide valuable exploratory insights into the patterns of these incidents, which could help inform safety measures for coastal activities. By analyzing historical data on shark incidents, this research will help understand the frequency of attacks and potentially identify the environmental and behavioral factors that correlate with different injury types.
+
+
+</center>
+<img src="images/jawls_movie.jpeg" width=180>
+<img src="images/sharkbite.jpeg" width=380>
+<img src="images/surfing.jpeg" width=200>
+<img src="images/species.jpeg" width=400>
+</center>
+
+# Data Sources
+
+The primary data source for this project is the California Department of Fish and Wildlife’s dataset on shark incidents, last updated in March 2024. This dataset includes a wide range of variables, such as the date, time, location, water depth, type of human activity, species of shark involved, and the severity of injuries. The data is original and directly collected from incidents reported in California, ensuring its reliability. However, there may be some concerns related to incomplete data entries or inconsistencies in how certain variables were recorded. These issues will be addressed through data cleaning and preparation. For example, the depth and injury fields will need to be standardized, and any missing or ambiguous entries will be carefully handled to maintain the integrity of the analysis.
+
+Link 1: [https://wildlife.ca.gov/Conservation/Marine/White-Shark.](https://wildlife.ca.gov/Conservation/Marine/White-Shark)
+
+Link 2: [https://wildlife.ca.gov/Data/Sci-Data.](https://wildlife.ca.gov/Data/Sci-Data)
+
+Link 3: [https://catalog.data.gov/dataset/shark-incident-database-california-56167](https://catalog.data.gov/dataset/shark-incident-database-california-56167).
+
+Link 4: [https://animalbiotelemetry.biomedcentral.com/articles/10.1186/2050-3385-1-2](https://animalbiotelemetry.biomedcentral.com/articles/10.1186/2050-3385-1-2).
+
+Link 4 is quite important as present a study titled **"Two-year migration of adult female white sharks (Carcharodon carcharias) reveals widely separated nursery areas and conservation concerns"**, published in Animal Biotelemetry, investigates the migratory patterns and ecological significance of adult female white sharks. Utilizing satellite tracking data collected over two years, the research highlights the extensive movement and habitat usage of these apex predators.
+
+Key findings of the study include:
+
+Identification of Migration Routes: Adult female white sharks exhibit long-distance migratory behavior, connecting distinct geographic regions, including widely separated nursery areas.
+
+```{r}
+#| label: setup 
+#| include: false
+
+# Load libraries and settings here
+library(tidyverse)
+library(readxl)
+library(here)
+library(viridis)
+library(dplyr)
+library(waffle)
+library(gridExtra)
+library(purrr)
+library(waffle)
+library(plotly)
+
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE,
+  comment = "#>",
+  fig.path = "figs/", # Folder where rendered plots are saved
+  fig.width = 7.252, # Default plot width
+  fig.height = 4, # Default plot height
+  fig.retina = 3 # For better plot resolution
+)
+
+# Put any other "global" settings here, e.g. a ggplot theme:
+theme_set(theme_bw(base_size = 20))
+
+# Write code below here to load any data used in project
+path_sharks <- here::here("data_raw", "Copy of SharkIncidents_1950_2022_220302.xlsx")
+path_attendance <- here::here("data_raw", "USLA Statistical Incident Database - ALL AGENCIES ALL YEARS.csv")
+data = read_excel(path_sharks)
+data2 = read.csv(path_attendance)
+```
+
+# Anticipated Results
+
+In this analysis, we expect to examine two key variables: the mode of activity during the shark incident and the type of injury sustained. Based on the dataset, it is anticipated that activities like surfing and swimming will show a higher frequency of incidents. Additionally, injuries will likely range from minor to fatal, with surfing-related activities potentially resulting in more severe outcomes. We anticipate that these variables will be distributed in a way that shows many patterns, where certain activities dominate the data. For example, it’s expected that shark incidents are concentrated in shallow waters where swimming and surfing take place. We also expect to find relationships between shark species and injury severity, where species like the Great White Shark may be more commonly associated with fatal incidents. 
+
+The first chart illustrates the geographical distribution of shark incidents along the California coast, with a focus on the "Red Triangle" where incidents take place. This helps visualize the relationship between locations and incident frequency. 
+The second chart shows shark incidents by activity type across different years, which helps to visualize the expected distribution of incidents across different activities and how this may change over time. 
+
+The distribution of activity types and injury severities will inform our understanding of which activities are most prone to shark incidents and how dangerous these incidents can be. The relationships between activity type and injury type will help answer research questions about what factors contribute to the likelihood and severity of shark-related injuries.
+
+The main goal of this study is to demystify the danger that sharks pose to humans, and to establish calm in sectors that still consider them a threat to society. We will try to do this with real data obtained from government databases, which we will explain later.
+
+# Data Cleaning
+
+### Dataset 1 Cleaning (Sharks Incidents)
+
+This dataset contains information of Sharks incidents in California.
+
+First, lets load the data in R, and see the first 6 observations.
+
+```{r}
+head(data)
+```
+```{r}
+data = data[1:(nrow(data) - 9), ]
+data <- data[, -c(10:14)]
+```
+
+Last 9 rows do not provide any information. So this is necessary to clean data.
+
+For further processing we transform the variables into the desired type. For example, the variables *Species* ,*County*, *Mode* are taken by *R* as character, but for us it would be better to consider them as factor.
+
+```{r}
+data$IncidentNum = as.numeric(data$IncidentNum)
+data$Time = as.numeric(data$Time)
+data$Mode = as.factor(data$Mode)
+data$County = as.factor(data$County)
+data$Location = as.factor(data$Location)
+```
+
+There are observations that are not entirely well given and to better analyze what we want to answer it is necessary to solve these inconsistencies.     
+
+```{r}
+data$Depth = ifelse(data$Depth == "surface"  | data$Depth == "surface*", 0, data$Depth)
+data$Depth = ifelse(data$Depth == "underwater"  | data$Depth == "submerged" | data$Depth == "submerged*", 5, data$Depth)
+data$Injury = ifelse(data$Injury == "minor*", 'minor', data$Injury)
+data$Injury = ifelse(data$Injury == "major*", 'major',data$Injury)
+data$Injury = ifelse(data$Injury == "none*", 'none',data$Injury)
+data$Injury = as.factor(data$Injury)
+data$Depth = as.numeric(data$Depth)
+data$Species = as.factor(data$Species)
+data <- data[!is.na(data$IncidentNum), ]
+data$number <- seq_len(nrow(data))
+data$Year <- year(data$Date)          
+data$Month <- month(data$Date, label = TRUE, abbr = FALSE)     
+data$Day <- weekdays(data$Date) 
+```
+
+Let's summarize our dataset:
+
+```{r}
+summary(data)
+```
+
+### Dataset 2 Cleaning (Beaches Attendance)
+
+*data2* dataset has some differences in county names comparing to *data* dataset, If We are going to compare this datasets and share information in the same time then, It will necessary to have same County names. 
+
+```{r}
+data2 = data2[, -c(8:66)]
+data2 <- data2[which(data2$State == "California"),]
+data2$Attendance = as.numeric(gsub(",", "", data2$Attendance))
+data2$County = ifelse(data2$County == "Sanoma County", "Sonoma", data2$County)
+data2$County = factor(gsub("(?i)county", "", data2$County))
+data2$County = factor(trimws(data2$County))
+data2$County = factor(gsub("(?i)county", "", data2$County))
+data2$County = factor(trimws(data2$County))
+unique(data2$County)
+```
+
+```{r}
+names(data2)
+```
+
+```{r}
+dim(data2)
+```
+# Evaluating our proposal expectations
+
+**1. Is there a lethal shark, or a species that tries to attack more than others?**
+
+First We create a pie chart to see the most common species involved in attacks.
+
+```{r}
+#| fig-width: 9 
+#| fig-height: 12
+
+species_counts <- data %>%
+  count(Species) %>%
+  mutate(percentage = n / sum(n) * 100,
+         label = paste0(Species, " (", round(percentage, 1), "%)"))
+
+fig <- plot_ly(data = species_counts,labels = ~Species,values = ~n,
+  textinfo = "label+percent",hoverinfo = "text",text = ~label, type = "pie",
+  marker = list(colors = RColorBrewer::brewer.pal(n = nrow(species_counts), "Set3")))
+
+fig <- fig %>% layout(
+    title = "Distribution of Shark Species",showlegend = TRUE)
+
+fig
+```
+
+We see that white shark is the most common by huge difference.
+```{r}
+species_counts
+```
+
+The information provided by these bar plots is revealing, white sharks are the only species that are present in fatal accidents and in those with quite high damage, giving us the understanding that it is the only species that humans can become afraid of.
+
+**2. What relationship is between the activity and the Injury type?**
+
+To answer this interesting question we created a bar plot for each type of injury, in which we will see which species are involved in each type of injury.
+
+```{r}
+conTable = table(data$Mode, data$Injury)
+conTable
+```
+
+```{r}
+injury_mode_count <- data %>% 
+  count(Mode, Injury) %>% 
+  rename(injury_count = 'n')
+
+injury_mode_count
+```
+
+```{r}
+#| fig-width: 11
+#| fig-height: 13
+
+# Order activities by the total number of incidents
+total_incidents_per_mode <- injury_mode_count %>%
+  group_by(Mode) %>%
+  summarise(total_incidents = sum(injury_count)) %>%
+  arrange(desc(total_incidents))
+
+injury_mode_count$Mode <- factor(injury_mode_count$Mode, 
+                                 levels = total_incidents_per_mode$Mode)
+
+# Create the faceted bar chart with adjusted label positions
+p<-ggplot(injury_mode_count, aes(x = Mode, y = injury_count, fill = Mode)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = injury_count), hjust = 2, size = 5) + 
+  coord_flip() +
+  labs(title = "Injury Types by Activity",
+       x = "Activity",
+       y = "Number of Incidents") +
+  scale_fill_viridis_d(option = "plasma", guide = "none") + 
+  facet_wrap(~ Injury, scales = "free_y") + 
+  expand_limits(y = max(injury_mode_count$injury_count) * 1.1) +
+  theme_minimal() +
+  theme(plot.title = element_text(color="coral",face = "bold.italic"),
+        axis.title.x = element_text(size=14, face="bold"),
+        axis.title.y = element_text(size=14, face="bold"),
+        axis.text.x = element_text(size = 10,face="bold"),
+        axis.text.y = element_text(size = 8),
+        strip.text = element_text(size = 12, face = "bold"))
+
+ggplotly(p)
+```
+
+We see that the most dangerous activities are on the surface, swimming, surfing, freediving. Diving has very few accidents.
+
+**3. What types of injuries are most common in shark incidents, if a shark attacks you… will it kill you for sure?**
+
+To answer this we created a waffle chart in which we will see the proportion of the type of damage, we will focus on the number of fatal accidents and also the incidents that did not present any damage.
+
+```{r}
+injury_counts <- data %>%
+  count(Injury) %>%
+  mutate(percentage = n / sum(n) * 100,
+         label = paste0(round(percentage, 1), "%")) 
+
+injury_counts_vector <- setNames(injury_counts$n, injury_counts$Injury)
+
+waffle_chart <- waffle(injury_counts_vector, rows = 10, 
+                       colors = RColorBrewer::brewer.pal(n = length(injury_counts$Injury), "Set3"),
+                       title = "Distribution of Injury Types")
+
+total_cells <- sum(injury_counts_vector)
+
+waffle_data <- expand.grid(row = 1:10, col = 1:ceiling(total_cells / 10))
+waffle_data <- waffle_data[1:total_cells, ]
+waffle_data$group <- rep(names(injury_counts_vector), injury_counts_vector)
+
+colors <- RColorBrewer::brewer.pal(n = length(injury_counts$Injury), "Set3")
+waffle_data$color <- unlist(lapply(waffle_data$group, function(g) {
+  colors[which(names(injury_counts_vector) == g)]
+}))
+
+fig <- plot_ly(data = waffle_data,x = ~col,y = ~row,color = ~group,
+               colors = colors,type = "scatter",mode = "markers",
+            marker = list(size = 15, symbol = "square")) %>%
+  layout(title = "Distribution of Injury Types",
+        xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+        yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+fig
+```
+
+We see that if someone have a shark attack not always is going to die. In fact the the 39 % of attacks did not damage.
+
+**4. Is there a town or city where attacks are more common?**
+
+To answer this We create a barchart.
+```{r}
+Table = table(data$County, data$Injury)
+Table
+```
+
+```{r}
+#| fig-width: 9 
+#| fig-height: 12
+
+county_counts <- data %>%
+  count(County) %>%
+  arrange(desc(n))
+
+p <- ggplot(county_counts, aes(x = reorder(County, n), y = n, fill = County)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_text(aes(label = n), hjust = 3, size = 5.5, color = "black") +
+  coord_flip() +
+  labs(title = "Shark Incidents per County",
+       x = "County",y = "Number of Incidents") +
+  theme_minimal() +
+  theme(plot.title = element_text(color="coral",size = 16, face = "bold.italic"),
+        axis.title.x = element_text(size=14, face="bold"),
+        axis.title.y = element_text(size=14, face="bold"),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
+        legend.position = "none")
+
+ggplotly(p)
+```
+
+Here we can see that the city where the largest number of accidents occurred was san diego with a little over 25 attacks recorded. San Francisco, for example, does not have many attacks (less than 5) and Los Angeles, which is a large city, has less than 10. 
+
+**5. There is a depth, mostly incidents occur?**
+```{r}
+Table_depth = table(data$Depth, data$Injury)
+Table_depth
+```
+
+We see that the highest number of accidents, both fatal and non-fatal, were recorded for activities carried out on the surface, giving us the understanding, for example, that diving is a safe activity if we refer to the danger of being attacked by a shark.
+
+
+**6. Is there a month or time when more accidents occur?**
+
+```{r}
+#| fig-width: 11
+#| fig-height: 8
+
+# Extract month from the Date column and create a month factor
+data$Month <- format(as.Date(data$Date, format = "%Y-%m-%d"), "%B")
+data$Month <- factor(data$Month, levels = month.name, ordered = TRUE)
+
+# Count the number of incidents per month
+month_counts <- data %>%
+  count(Month) %>%
+  arrange(Month)
+
+# Plot the number of shark incidents by month
+p<-ggplot(month_counts, aes(x = Month, y = n, group = 1)) +
+  geom_line(color = "darkred", size = 1) +
+  geom_point(color = "darkred", size = 2) +
+  labs(title = "Shark Incidents by Month",
+       x = "Month",
+       y = "Number of Incidents") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(color = "Coral",size = 16, face = "bold"),
+        axis.title.x = element_text(size = 16, face = "bold"),
+        axis.title.y = element_text(size = 16, face = "bold"))
+
+ggplotly(p)
+```
+
+According to information taking from: **"Two-year migration of adult female white sharks (Carcharodon carcharias) reveals widely separated nursery areas and conservation concerns"** The white shark mating season occurs in spring or summer, in temperate waters, We conclude that the highest number of accidents occur at the end of the mating seasons. 
+
+But there was an even more important issue, we have enough evidence that the highest number of accidents occur during surfing activities by far, so it is important to know on what dates this activity is practiced according to information taken from... the month with the best weather for surfing is October. The other activities with the highest number of accidents are apnea and swimming, which for reasons of weather and vacations are practiced in summer from June to October, which makes sense given the time series graph shown above.
+
+### Attendance and Per capita Incidents
+
+**7. What percentage of people attend to beach per day and what percentage of beach visitors bathe?**
+
+This is where we will motivate the idea of getting an estimate of the number of people who attended each day using the estimates obtained from the study: "the human tide: beach attendance and bathing rates for southern california beaches". in which the following conclusion is reached, of monthly attendance in percentage, this percentage was obtained in the year 2007, but we will use it to estimate the other years (because the availability of data is a complicated challenge):
+
+```{r}
+month <- c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+month_percentage <- c(4.6/119.3, 4/119.3, 6/119.3,7/119.3, 9/119.3, 16/119.3, 28/119.3, 24/119.3, 12/119.3, 5.4/119.3, 4/119.3, 4/119.3)
+
+data_month_per_assistance <- data.frame(Month = month, month_percentage = month_percentage)
+data_month_per_assistance
+```
+
+They also provide us with the percentage of beach attendance per day.
+
+```{r}
+days_of_week <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+percentage <- c(0.10, .8, .9, .10, .15, .27, .21)
+
+data_day_per_assistance <- data.frame(Day = days_of_week, day_percentage = percentage)
+data_day_per_assistance
+```
+<center>
+<img src="images/attendance_day.jpeg" width = 750>
+</center>
+
+The graph above was taken from **"Beach Attendance and Bathing Rates for Southern California Beaches"**.
+
+And the percentage of people who bathe, that is, who go into the sea.
+```{r}
+month <- c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+month_percentage <- c(0.26,.28,.33,.31,.41,.50,.52,.54,.50,.36,.29,.27)
+
+data_month_per_bath <- data.frame(Month = month, month_percentage = month_percentage)
+data_month_per_bath$month_asis_percentage <- data_month_per_bath$month_percentage*data_month_per_assistance$month_percentage
+data_month_per_bath 
+```
+
+
+<center>
+<img src="images/percent_bathe.jpeg" width=750>
+</center>
+
+The graph above was taken from **"Beach Attendance and Bathing Rates for Southern California Beaches"**.
+
+In dataset 1 there is information from 1950's to 2022.
+
+```{r}
+summary(data$Year)
+```
+
+In dataset 2 there is information from 1964 to 2023, so We do not have information on visits to the beaches before 1964. 
+
+```{r}
+summary(data2$Year)
+```
+
+It is also important to note that the information on beach visits does not exactly match the same counties for the two datasets. So it is a challenge to combine the information (as well as to search for it, which was very tedious.)
+
+```{r}
+p<-ggplot(data, aes(x = reorder(County, -table(County)[County]))) +
+   geom_bar(fill = "steelblue", color = "black") +
+   labs(title = "Number of incidents per county",x = "Counties",y = "Frequency") +
+   theme_minimal() +
+   theme(axis.text.x = element_text(angle = 45, hjust = 1),
+         plot.title = element_text(color = "Coral",size = 16, face = "bold"),
+         axis.title.x = element_text(size = 16, face = "bold"),
+         axis.title.y = element_text(size = 15, face = "bold"))
+
+ggplotly(p)
+```
+
+
+```{r}
+p<-ggplot(data2, aes(x = reorder(County, -table(County)[County]))) +
+   geom_bar(fill = "steelblue", color = "black") +
+   labs(title = "Counties in dataset 2",x = "Counties",y = "Frequency") +
+   theme_minimal() +
+   theme(axis.text.x = element_text(angle = 45, hjust = 1),
+         plot.title = element_text(color = "Coral",size = 16, face = "bold"),
+         axis.title.x = element_text(size = 16, face = "bold"),
+         axis.title.y = element_text(size = 15, face = "bold"))
+
+ggplotly(p)
+```
+
+Calculating the number of people who went to each beach per year and per county, 
+
+```{r}
+data3 <- data2 %>%
+  group_by(Year, County) %>%
+  summarise(total_attendance = sum(Attendance, na.rm = TRUE), .groups = "drop")
+
+head(data3)
+```
+
+```{r}
+merged_data = merge(data3, data, by.x=c('Year', 'County'), 
+                               by.y=c('Year', 'County'))
+names(merged_data)
+```
+
+**8. What is the incidents per-capita?**
+
+Addressing this question is quite complicated because it is not necessarily accessible to obtain information on the number of people who attend the beach on the exact days in which accidents occurred. Searching for this data day by day is an overwhelming task, so for certain counties it can only be answered with the information that we were able to find after much effort in dataset 2.
+
+It is important to note that there is no data on attendance at some beaches, especially some islands. Therefore, only the cases of accidents per capita will be studied for places where we do have the data.
+
+```{r}
+data4 <- merged_data %>%
+  group_by(County) %>%
+  summarise(attendance_county = sum(total_attendance, na.rm = TRUE), .groups = "drop")
+
+head(data4)
+```
+
+Now We present total incidents ocurred from 1950 to 2022. (We present this graph above). 
+
+```{r}
+county_counts <- data %>%
+  count(County) %>%
+  arrange(desc(n))
+```
+
+Now We present total attendance of people from 1964 to 2023.
+
+```{r}
+data4
+```
+
+So We are in conditions to calculate incidents per capita in each county. We cannot calculate for all counties because we do not have the data for all of them. But we do have the data for the most important ones, in the document named: **"Beach Attendance and Bathing Rates for Southern California Beaches"**, is estimated that about 45% of beach visitors actively engage in recreational water contact anually, It makes no sense to calculate the incidents per capita for people who do not go into the sea.
+
+```{r}
+county_counts <- county_counts %>%
+  mutate(County = trimws(tolower(County)))
+
+data4 <- data4 %>%
+  mutate(County = trimws(tolower(County)))
+
+merged_data <- county_counts %>%
+  inner_join(data4, by = "County")
+
+merged_data <- merged_data %>%
+  mutate(attendance_contact_water = 0.45*attendance_county)
+
+merged_data <- merged_data %>%
+  mutate(per_capita_incident = n / attendance_contact_water)
+  
+merged_data[-c(3), ] 
+```
+
+As we can see, the incidents per capita are insignificant, with a maximum probability of 0.0000113 (which is the case of Ventura beach). So We have concluded the main goal in this research, We are in conditions to claim that It is almost impossible that a Shark kill someone. 
+
+
