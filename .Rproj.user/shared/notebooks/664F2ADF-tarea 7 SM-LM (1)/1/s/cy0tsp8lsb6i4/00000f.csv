@@ -1,0 +1,2 @@
+"0","effect_plot(relin, pred = q10inc, interval = TRUE, plot.points = TRUE, "
+"0","            jitter = 0.05, partial.residuals = TRUE,  y.label = ""Percepción protestas"", x.label= ""Ingreso"")"

@@ -1,0 +1,5 @@
+"0","month <- c(""January"", ""February"", ""March"", ""April"", ""May"", ""June"", ""July"", ""August"", ""September"", ""October"", ""November"", ""December"")"
+"0","month_percentage <- c(4.6/119.3, 4/119.3, 6/119.3,7/119.3, 9/119.3, 16/119.3, 28/119.3, 24/119.3, 12/119.3, 5.4/119.3, 4/119.3, 4/119.3)"
+"0",""
+"0","data_month_per_assistance <- data.frame(Month = month, month_percentage = month_percentage)"
+"0","data_month_per_assistance"
